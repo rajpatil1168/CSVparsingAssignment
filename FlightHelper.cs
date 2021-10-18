@@ -62,6 +62,7 @@ namespace HappyFlight
             Console.WriteLine("\n1.Mumbai   2.Delhi   3.Kolkata   4.NewYork   5.Abu Dhabi");
             do
             {
+                Console.WriteLine("Enter Which TripType you want: \nOneWay: Press 1\nRoundTrip: Press 2:");Console.WriteLine("Enter Which TripType you want: \nOneWay: Press 1\nRoundTrip: Press 2:");Console.WriteLine("Enter Which TripType you want: \nOneWay: Press 1\nRoundTrip: Press 2:");
                 Console.WriteLine("Enter Which City you want correctly :: ");
                 toCityCode = Console.ReadLine();
             } while (!(String.Equals(toCityCode, fromCityCode) || String.Equals(toCityCode, "1") || String.Equals(toCityCode, "2") || String.Equals(toCityCode, "3") || String.Equals(toCityCode, "4") || String.Equals(fromCityCode, "5")));
@@ -103,6 +104,7 @@ namespace HappyFlight
             if (String.Equals(classnumber, "1"))
             {
                 nameclass = "Economy";
+                Console.WriteLine("Enter Which TripType you want: \nOneWay: Press 1\nRoundTrip: Press 2:");
             }
             else if (String.Equals(classnumber, "2"))
             {
@@ -111,6 +113,11 @@ namespace HappyFlight
             else if (String.Equals(classnumber, "3"))
             {
                 nameclass = "Business";
+                Console.WriteLine("Enter Which TripType you want: \nOneWay: Press 1\nRoundTrip: Press 2:");
+            }
+            else if (String.Equals(classnumber, "4"))
+            {
+                nameclass = "Premium Economy";
             }
             else
             {
@@ -167,6 +174,7 @@ namespace HappyFlight
             {
                 if (driver.FindElement(by) != null)
                 {
+                    Console.WriteLine("IsELEMENT={0}   -->>> is not NULL !", by);
                     driver.FindElement(by);
                     return true;
                 }
