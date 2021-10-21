@@ -1,243 +1,97 @@
-﻿using Nvidia.AtpLib;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Name :Abhishek Jayawantrao Patil 
+//    last edit :8/10/2021 12:00PM
+//_________________________________________________________________________________________________________________
+//   Assignment 2
+//          1.Launch Calculator
+//          2.Do some operations based on your choice
+//          3.Take snapshots at each operation, Copy them to a network location and close calculator
+//      
+//  Steps :
+//          1.Getting 2 inputs as a two numbers and a operation from User.
+//          2.Calculator Opening. Performing Opertion on given inputs. Taking ScreenShot at each Action. 
+//            Storing screenshots in Network Location. 
+//
+//  Process:  
+//            1. Check calculator is open or not
+//                    2. if open, excute on that if not opened then open
+//                    3. Take inputs from user : A. fist Number    B.Second Number     C.Opertaion sign
+//                    4. Convert those inputs in strings so that we can use it in naming
+//            5. Check whether inputs are proper or not 
+//                    6.if valid proceed further ,if not give exception and stops
+//                            7.If open, Declare hierarchy wise... declaration of  AE_Calc --> AE_group ---> AE_Number_pad ---> {Declrare AE_input1 & AE_input2 & AE_operation} Scope wise*
+//                            8. Scope wise press the buttons and check it whether it is pressed or not
+//                            9.if pressed TOOK ScreenShot and stored at Network location
+//                            10.Check whether there are any exceptions or errors or not   Act accordingly give exceptions
+//            11.Check Screen shots are taken or not 
+//            12.Check whether operations are performed or not
+//            13 Check for Success wait for 4 sec (sleep function ) then END !
+//
+//_________________________________________________________________________________________________________________
 
-namespace GamePlaySetup
+
+using System;
+using Nvidia.AtpLib;
+using System.Windows.Automation;
+using System.Threading;
+
+namespace Assignment2
 {
     class Program
     {
         static void Main(string[] args)
         {
-            GamePlaySetup runProc = new GamePlaySetup();
-            try
+            while (true)
             {
-                Console.WriteLine("Starting Run part of TEST");
-                string name = "Game Play Setup";
-                string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                string logName = "Setup"; // For generating run.log
-                runProc.Init(name, version, args, logName, true);
-                runProc.WriteToTaskDir(true); // Write Directly to Task Result Directory
-                runProc.EnableResultsInDebugLog(true); // Write results to log file as well
-                runProc.EnableOverAllResultCalculation(false);
-                runProc.Execute();
-            }
-            catch (Exception e)
-            {
-                runProc.HandleException(e);
-            }
-            //finally
-            //{
-            //    Win32.ScriptExit(0);
-            //}
-        }
-    }
+                int i = 1, j = 1;
+                bool Check_program = false;
+                bool is_Cal_already_opened = false;
+                string str_continue;
+                UIA uia = new UIA();
+                Program obj_pro1 = new Program();
 
-    class GamePlaySetup : Procedure
-    {
-        private string toolsPath = AtpEnvironment.ApplicationDir + @"\DL_Setup";
-        private string serverToolsPath = AtpEnvironment.ServerApplicationDir + @"\DL_Setup";
-        private string deepLearningfolderPath;
-        protected override void Run()
-        {
-            bool status = false;
-            try
-            {
-                //if (!Detection.IsHDREnabled())
-                //{
-                //    ScriptState.SetCurrentState(ResultType.NOTSUPPORTED.ToString());
-                //    resultAgent.AddSubResult("HDR Display Connected", ResultType.NOTSUPPORTED);
-                //}
-                //else
-                //{
-                //    resultAgent.AddSubResult("HDR Display Connected", true);
-                //}
-                //string anacondaFolderName = System.Configuration.ConfigurationManager.AppSettings["AnacondaSetupFolder"];
-                //if (string.IsNullOrEmpty(anacondaFolderName))
-                //    anacondaFolderName = @"DeepLearning\Anaconda3";
-                //deepLearningfolderPath = AtpEnvironment.SystemDrive + @"\" + anacondaFolderName;
-                status = CopyPython3();//SetupGamePlayPrerequisites();
-                ScriptState.SetCurrentState(status.ToString());
-                resultAgent.AddSubResult("Setup Gameplay Prerequisites", status);
-            }
-            catch(Exception ex)
-            {
-                log.WriteLine("Exception : " + ex.Message);
-                log.WriteLine(ex.StackTrace);
-            }
-            ScriptState.SetCurrentState(status.ToString());
-        }
-
-        private bool CopyPython3()
-        {
-            bool result = false;
-            string python3LocalPath = System.Configuration.ConfigurationManager.AppSettings["PathPythonExecutable"];
-            if(string.IsNullOrEmpty(python3LocalPath))
-                python3LocalPath = @"D:\python3";
-            string serverDirectoryPathForFile = serverToolsPath + @"\python3";
-            if (!Directory.Exists(python3LocalPath))
-            {
-                Directory.CreateDirectory(python3LocalPath);
-                if (Directory.Exists(serverDirectoryPathForFile))
+                try
                 {
-                    log.WriteLine("Copying Python3 package Files...");
-                    FileCopier fileCopier = new FileCopier(serverDirectoryPathForFile, python3LocalPath, "Python3 Package Copy");
-                    fileCopier.Copy();
-                    fileCopier.WaitForComplete();
-                    log.WriteLine("Python3 package Files Copied...");
-                    result = true;
+                    System.Diagnostics.Process[] C = System.Diagnostics.Process.GetProcessesByName("Calculator");
+                    if (C.Length != 0)
+                    {
+                        Console.WriteLine(i++ + ".Calculator already Opened.");
+                        is_Cal_already_opened = true;
+                        AutomationElement AE_Calc = uia.GetElementByControlTypeAndName(AutomationElement.RootElement, ControlType.Window, "Calculator", true, 60);
+                        Check_program = Assignment2_Helper.All_calcultor_Operations(uia, i, j, AE_Calc, is_Cal_already_opened);
+                    }
+                    else
+                    {
+                        Console.WriteLine(i++ + ".not Opened.");
+                        System.Diagnostics.Process.Start("calc.exe");
+                        AutomationElement AE_Calc = uia.GetElementByControlTypeAndName(AutomationElement.RootElement, ControlType.Window, "Calculator", true, 60);
+                        Console.WriteLine(i++ + ".Calculator Opened.");
+                        Check_program = Assignment2_Helper.All_calcultor_Operations(uia, i, j, AE_Calc, is_Cal_already_opened);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    log.WriteLine("ERR:  Python3 package not found in location - " + serverDirectoryPathForFile);
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    Assignment2_Helper.IsSucecssfunction(Check_program);
+                    Console.WriteLine("YOU WANT TO CONTINUE(y/n)!!");                    
+                    str_continue = Console.ReadLine();
+                    while(str_continue.ToLower() != "y" && str_continue.ToLower() != "n")
+                    {
+                        Console.Write("The value must be of integer type, try again:\n ");
+                        str_continue = Console.ReadLine();                        
+                    }
+                    
+                }
+                if (str_continue.ToUpper() == "N")
+                {
+                    break;
                 }
             }
-            else
-            {
-                log.WriteLine("Python3 package already exists");
-                result = true;
-            }
-            return result;
+
         }
-
-        private void ExecuteDLInstallCommands(string command, string workingDir, int timeout, Log log)
-        {
-            log.WriteLine("Running command: " + command);
-            log.WriteLine("Working Directory: " + workingDir);
-            Command cmd = new Command("/C " + command);
-            cmd.WorkingDirectory(workingDir);
-            bool isProcessExited = false;
-            cmd.ExecuteCmd(out isProcessExited);
-            log.WriteLine("Is process Exited: " + isProcessExited);
-            DateTime start = DateTime.Now;
-            int count = 0;
-            while (!cmd.HasExited && count < 3)
-            {
-                if (cmd.WaitForExit(timeout))
-                {
-                    log.WriteLine("Command " + command + " is executed successfully.");
-                    DateTime endtime = DateTime.Now;
-                    TimeSpan time = endtime - start;
-                    log.WriteLine("Time for installation: " + time.Minutes + "." + time.Seconds + " mins");
-
-                }
-                count++;
-            }
-
-
-            if (cmd.ExitCode != 0)
-                log.WriteLine("Package install is not comelete or faild :- Exid code is: " + cmd.ExitCode);
-        }
-        public bool InstallAnaconda()
-        {
-            string anacondaExeName = System.Configuration.ConfigurationManager.AppSettings["AnacondaExeName"];
-            if (string.IsNullOrEmpty(anacondaExeName))
-                anacondaExeName = "Anaconda3-2020.11-Windows-x86_64.exe";
-            if (!File.Exists(toolsPath + @"\" + anacondaExeName))
-            {
-                log.WriteLine(anacondaExeName + " not found at " + toolsPath + ". Copying it...");
-
-                FileCopier.CopyFile(serverToolsPath, toolsPath, anacondaExeName, true);
-                if (!File.Exists(toolsPath + @"\" + anacondaExeName))
-                {
-                    resultAgent.WriteLine(anacondaExeName + " not found at " + toolsPath + " after copy");
-                    return false;
-                }
-                else
-                    log.WriteLine(anacondaExeName + " File copied at " + toolsPath);
-            }
-            
-            ExecuteDLInstallCommands(anacondaExeName + " /InstallationType=JustMe /RegisterPython=1 /S /D=" + deepLearningfolderPath, toolsPath, 60000 * 30, log);
-            log.WriteLine("Setting envirement variable");
-            string currentUseEVPath = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
-            string variablesToSet = deepLearningfolderPath + @"\Scripts;" + deepLearningfolderPath;
-            Environment.SetEnvironmentVariable("PATH", currentUseEVPath + ";" + variablesToSet, EnvironmentVariableTarget.User);
-            Thread.Sleep(1000);
-            string variables = Environment.GetEnvironmentVariable("PATH", EnvironmentVariableTarget.User);
-            if (variables.Contains(variablesToSet))
-                log.WriteLine("Enviornment variables set successfully: " + variables);
-            else
-            {
-                log.WriteLine("Enviornment variable are not set. Still continuing with setup as not dependent on it.");
-            }
-            return File.Exists(deepLearningfolderPath + @"\python.exe");
-        }
-
-        public bool InstallCUDAToolkit()
-        {
-            string cudaExeName = System.Configuration.ConfigurationManager.AppSettings["CudaExeName"];
-            if (string.IsNullOrEmpty(cudaExeName))
-                cudaExeName = "cuda_11.2.0_460.89_win10.exe";
-            if (!File.Exists(toolsPath + @"\" + cudaExeName))
-            {
-                log.WriteLine(cudaExeName + " not found at " + toolsPath + ". Copying it...");
-                FileCopier.CopyFile(serverToolsPath, toolsPath, cudaExeName, true);
-                if (!File.Exists(toolsPath + @"\" + cudaExeName))
-                {
-                    resultAgent.WriteLine(cudaExeName + " not found at " + toolsPath + " after copy");
-                    return false;
-                }
-                else
-                    log.WriteLine(cudaExeName + " File copied at " + toolsPath);
-            }
-
-            ExecuteDLInstallCommands(cudaExeName + " -s", toolsPath, 60000 * 30, log);
-            return Directory.Exists(AtpEnvironment.SystemDrive + @"\Program Files\NVIDIA GPU Computing Toolkit\CUDA");
-        }
-
-        public void InstallRequiredPythonPackages(string[] allPackages)
-        {
-            string pipPath = deepLearningfolderPath + @"\Scripts\pip3.exe";
-            int timeout = 300000;
-            log.WriteLine("Installing packages");
-            foreach (string pckg in allPackages)
-            {
-                if (string.IsNullOrEmpty(pckg))
-                    continue;
-                string command = pipPath + " install " + pckg;
-                ExecuteDLInstallCommands(command, deepLearningfolderPath + @"\Scripts", timeout, log);
-                Thread.Sleep(2000);
-            }
-        }
-        public bool SetupGamePlayPrerequisites()
-        {
-            string pythonPath = deepLearningfolderPath + @"\python.exe";
-            if (File.Exists(pythonPath))
-            {
-                log.WriteLine("Ananconda already installed");
-            }
-            else
-            {
-                if (!InstallAnaconda())
-                {
-                    resultAgent.WriteLine("Unable to install anaconda on the system");
-                    return false;
-                }
-                else
-                {
-                    log.WriteLine("Anaconda installed on the system");
-                }
-            }
-            
-            int timeout = 60000;
-            log.WriteLine("Upgrade pip");
-            string upgrade_pip = pythonPath + " -m pip install --upgrade pip"; // upgrade pip to latest to install pymssql
-            ExecuteDLInstallCommands(upgrade_pip, deepLearningfolderPath, timeout, log);
-            Thread.Sleep(2000);
-
-            string requiredPackageFileName = System.Configuration.ConfigurationManager.AppSettings["PackageToInstall"];
-            if (string.IsNullOrEmpty(requiredPackageFileName))
-                requiredPackageFileName = "PackagesToInstall.txt";
-
-            string[] allPackages = File.ReadAllLines(requiredPackageFileName);
-            InstallRequiredPythonPackages(allPackages);
-
-            return true;
-        }
-    }
+     }
 }
+
